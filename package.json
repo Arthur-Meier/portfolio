@@ -1,0 +1,10 @@
+{
+  "name": "arthur-meier-portfolio",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node scripts/generate.mjs",
+    "test": "node --test",
+    "check": "python3 scripts/check-site.py dist"
+  }
+}
