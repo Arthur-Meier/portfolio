@@ -1,7 +1,7 @@
 from html.parser import HTMLParser
 from pathlib import Path
 from urllib.parse import urlsplit, unquote
-import sys
+import argparse
 
 class Page(HTMLParser):
     def __init__(self):
@@ -16,7 +16,12 @@ class Page(HTMLParser):
         if tag=='link' and a.get('rel')=='alternate': self.alternates.add(a.get('hreflang'))
         if tag=='meta' and a.get('name')=='description' and a.get('content'): self.description=True
 
-root=Path(sys.argv[1] if len(sys.argv)>1 else 'dist').resolve()
+parser=argparse.ArgumentParser()
+parser.add_argument('directory', nargs='?', default='dist')
+parser.add_argument('--base-path', default='')
+args=parser.parse_args()
+base_path=args.base_path.rstrip('/')
+root=Path(args.directory).resolve()
 pages={}
 for relative, language in [('index.html','pt-BR'),('en/index.html','en')]:
     p=Page(); p.feed((root/relative).read_text()); pages[relative]=p
@@ -29,7 +34,11 @@ for relative, page in pages.items():
         u=urlsplit(reference)
         if u.scheme or u.netloc: continue
         if u.path:
-            target=(root/unquote(u.path.lstrip('/'))) if u.path.startswith('/') else (root/relative).parent/unquote(u.path)
+            local_path=u.path
+            if local_path.startswith('/') and base_path:
+                assert local_path.startswith(base_path+'/'), f'{relative}: asset outside site base {reference}'
+                local_path=local_path[len(base_path):]
+            target=(root/unquote(local_path.lstrip('/'))) if local_path.startswith('/') else (root/relative).parent/unquote(local_path)
             if u.path.endswith('/'): target=target/'index.html'
         else: target=root/relative
         assert target.is_relative_to(root), f'{relative}: asset escapes output'

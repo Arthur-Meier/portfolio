@@ -2,13 +2,13 @@
 
 A bilingual personal portfolio for **Arthur Meier · Software Engineer | Full Stack**.
 
-**[View the website](https://arthur-meier.swoonyjay1024.chatgpt.site)** · [Português](https://arthur-meier.swoonyjay1024.chatgpt.site/) · [English](https://arthur-meier.swoonyjay1024.chatgpt.site/en/)
+**[View the website](https://arthur-meier.github.io/portfolio/)** · [Português](https://arthur-meier.github.io/portfolio/) · [English](https://arthur-meier.github.io/portfolio/en/)
 
 The site brings together professional case studies, personal projects, technical skills, work experience and contact details. Both language versions include complete HTML content before JavaScript runs.
 
 ## Features
 
-- Portuguese at `/` and English at `/en/`, with localized metadata and résumé downloads.
+- Portuguese and English pages, with localized metadata and résumé downloads.
 - Light, dark and system themes, with a saved preference when browser storage is available.
 - Project filters, technical skill panels and an accessible mobile navigation menu.
 - Native expandable case studies and project descriptions.
@@ -56,15 +56,27 @@ Build the site before running `check`. The test suite covers locale consistency,
 | `scripts/generate.mjs` | Static site generator |
 | `scripts/check-site.py` | HTML and asset validation |
 | `tests/` | Node.js tests |
+| `.github/workflows/pages.yml` | Test, build and deploy to GitHub Pages |
 | `dist/` | Generated website; excluded from Git |
 
 ## Edit content
 
 Update `siteContent.pt` and `siteContent.en` in `src/content.mjs`, keeping matching project IDs, categories, skill IDs and interface keys. Each locale defines its own résumé asset. Rebuild after changing source files.
 
-The generator writes complete files to `dist/`, which can be served by a static host. The site uses root-relative asset paths and expects deployment at the origin root; hosting under a repository subpath requires a base-path adaptation.
+The generator writes complete files to `dist/`, which can be served by a static host. For deployment under a subpath, pass `--base-path /portfolio`; this prefixes assets, navigation, downloads and metadata. Omit it for deployment at the origin root.
 
-Publishing code here does not automatically deploy changes to the live website. Its current hosting is managed through Sites.
+## GitHub Pages deployment
+
+In repository **Settings → Pages**, the publishing source is **GitHub Actions**. Every push to `main` runs the tests, builds the website, validates the output and deploys only `dist/`. The workflow reads the origin and base path from GitHub Pages configuration, so the project address works at `/portfolio/`.
+
+To reproduce the Pages build locally:
+
+```sh
+npm run build -- --origin https://arthur-meier.github.io --base-path /portfolio
+python3 scripts/check-site.py dist --base-path /portfolio
+```
+
+The source files and README are not the deployment artifact. The generated `dist/` directory stays outside Git; GitHub Actions creates and uploads it for each deployment.
 
 ## Em português
 
